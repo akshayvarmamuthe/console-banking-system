@@ -1,63 +1,119 @@
 
-import java.util.Random;
+
 import java.util.Scanner;
 
 public class Main
 {
     public static void main(String[] args) {
+        Account ac=null;
         System.out.println("Create your Account");
         Scanner s=new Scanner(System.in);
-        System.out.print("enter your name: ");
-        String userName=s.nextLine();
-        System.out.print("enter your age: ");
-        int userAge=s.nextInt();
-        System.out.print("enter your opening balance: ");
-        double userBalance=s.nextDouble();
-        Account ac;
-        if(userAge>=18)
-           ac=new MajorAccount(userName, userAge, userBalance);
-        else
-            ac=new MinorAccount(userName, userAge, userBalance);
-        
-        ac.displayAccountDetails();
+        while(ac==null)
+        {
+            System.out.print("enter your name: ");
+            String userName=s.nextLine();
+            System.out.print("enter your age: ");
+            int userAge=s.nextInt();
+            s.nextLine();
+            System.out.print("enter your opening balance: ");
+            double userBalance=s.nextDouble();
+            s.nextLine();
+            if(userAge>=18)
+                try{
+                    ac=new MajorAccount(userName, userAge, userBalance);
+                } catch (InvalidUserNameException | InvalidAgeException | InvalidAmountException maje) {
+                    System.out.println(maje.getMessage());
+                }
+            else
+                try {
+                    ac=new MinorAccount(userName, userAge, userBalance);
+                } catch (InvalidUserNameException | InvalidAgeException | InvalidAmountException mine) {
+                    System.out.println(mine.getMessage());
+                }
+        }
+        int userChoice;
+        boolean flag=true;
+        while(flag)
+        {
+            System.out.println("1. Get Account Details\n2. Deposit Amount\n3. Withdraw Money\n4. Check Balance\n 5. Edit Name\n6. Exit");
+            System.out.println("Enter Your Choice: ");
+            userChoice=s.nextInt();
+            switch(userChoice)
+            {
+                case 1 -> ac.displayAccountDetails();
+                case 2 ->{
+                    System.out.print("Enter Amount to Deposit: ");
+                    double amount=s.nextDouble();
+                    s.nextLine();
+                    try {
+                        ac.depositMoney(amount);
+                    } catch (InvalidAmountException iae) {
+                        System.out.println(iae.getMessage());
+                    }
+                } 
+                case 3 ->{
+                    System.out.print("Enter Amount to Withdraw: ");
+                    double amount=s.nextDouble();
+                    s.nextLine();
+                    try {
+                        ac.withdrawMoney(amount);
+                    } catch (InvalidAmountException | InsufficientBalanceException | WithdrawalLimitException we) {
+                        System.out.println(we.getMessage());
+                    }
+                }
+                case 4 -> System.out.println("Your Current Balance: "+ac.getUserBalance());
+                case 5 -> {
+                    System.out.print("Enter New Name: ");
+                    String newName=s.nextLine();
+                    try {
+                        ac.setUserName(newName);
+                    } catch (InvalidUserNameException ine) {
+                        System.out.println(ine.getMessage());
+                    }
+                }
+                case 6 -> {
+                    System.out.println("Thanks! Exiting");
+                    flag=false;
+                }
+                default -> System.out.println("Enter Valid Option");
+            }
+        }
         s.close();
     }
 }
-class Account
-{
-    private static final String BANK_CODE="AK-26-";
-    private static final Random random=new Random();
-    private final int id= 1000+random.nextInt(9000); 
-    final String userAcNO=BANK_CODE+id;
-    String userName;
-    int userAge;
-    double userBalance;
-    public void displayAccountDetails()
-    {
-        System.out.println("Account Number: "+userAcNO);
-        System.out.println("Account Holder: "+userName);
-        System.out.println("Account Holder Age: "+userAge);
-        System.out.println("Account Balance: "+userBalance);
-    }
-}
-class MajorAccount extends Account
-{
-    MajorAccount(String userName, int userAge, double userBalance)
-    {
-        this.userName=userName;
-        this.userAge=userAge;
-        this.userBalance=userBalance;
-        System.out.println("Your Major Account is Created!");
-    }
-}
-class MinorAccount extends Account
-{
-    MinorAccount(String userName, int userAge, double userBalance)
-    {
-        this.userName=userName;
-        this.userAge=userAge;
-        this.userBalance=userBalance;
-        System.out.println("Your Minor Account is Created!");
 
+class WithdrawalLimitException extends Exception 
+{      
+    public WithdrawalLimitException(String msg)
+    {
+        super(msg);     
+    } 
+}
+class InsufficientBalanceException extends Exception
+{
+    public InsufficientBalanceException(String msg)
+    {
+        super(msg);
+    }
+}
+class InvalidAmountException extends Exception
+{
+    public InvalidAmountException(String msg)
+    {
+        super(msg);
+    }
+}
+class InvalidUserNameException extends Exception
+{
+    public InvalidUserNameException(String msg)
+    {
+        super(msg);
+    }
+}
+class InvalidAgeException extends Exception
+{
+    public InvalidAgeException(String msg)
+    {
+        super(msg);
     }
 }
